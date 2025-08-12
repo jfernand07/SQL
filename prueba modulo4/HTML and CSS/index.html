@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Contacts Manager — CRUD + CSV Import</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+    <h1>Contacts Manager</h1>
+</header>
+
+<main class="container">
+    <section class="controls">
+        <button id="btnOpenAdd" class="btn primary">➕ Add Contact</button>
+        <label for="csvFile" class="btn secondary csv-label">📂 Import CSV</label>
+        <input id="csvFile" type="file" accept=".csv" hidden>
+        <button id="btnRefresh" class="btn ghost">🔄 Refresh</button>
+    </section>
+
+    <section id="formSection" class="card hidden">
+        <h2 id="formTitle">Add New Contact</h2>
+        <form id="formContact" autocomplete="off">
+            <div class="row">
+                <label for="inputName">Name</label>
+                <input id="inputName" name="name" type="text" placeholder="Full name" required>
+            </div>
+            <div class="row">
+                <label for="inputEmail">Email</label>
+                <input id="inputEmail" name="email" type="email" placeholder="Email" required>
+            </div>
+            <div class="row">
+                <label for="inputAge">Age</label>
+                <input id="inputAge" name="age" type="number" min="1" placeholder="Age" required>
+            </div>
+            <div class="row">
+                <label for="inputPhone">Phone</label>
+                <input id="inputPhone" name="phone" type="tel" placeholder="Phone" required>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn primary">Save</button>
+                <button type="button" id="btnCancelForm" class="btn ghost">Cancel</button>
+            </div>
+            <div id="messageBox" class="message"></div>
+        </form>
+    </section>
+
+    <section class="table-wrap card">
+        <table id="contacts-table">
+            <thead>
+                <tr>
+                    <th style="width:5%">ID</th>
+                    <th style="width:25%">Name</th>
+                    <th style="width:25%">Email</th>
+                    <th style="width:10%">Age</th>
+                    <th style="width:20%">Phone</th>
+                    <th style="width:15%">Actions</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+        <div id="emptyState" class="empty hidden">No contacts yet — add one or import a CSV.</div>
+    </section>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+<script src="../app.js/application.js"></script>
+</body>
+</html>
+
+
+
+
+
