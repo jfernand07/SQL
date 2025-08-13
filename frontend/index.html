@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pagos</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <h1> Sistema de Pagos</h1>
+
+    <!-- =CARGA DE CSV -->
+    <section>
+        <h2>📂 Cargar CSV</h2>
+        <label>Clientes CSV: <input type="file" id="csvClientes" accept=".csv"></label>
+        <label>Facturas CSV: <input type="file" id="csvFacturas" accept=".csv"></label>
+        <label>Transacciones CSV: <input type="file" id="csvTransacciones" accept=".csv"></label>
+        <button id="btnCargarCSV">Cargar CSV</button>
+    </section>
+
+    <!-- FORMULARIOS MANUALES  -->
+    <section>
+        <h2> Insertar Datos</h2>
+
+        <!-- usuario-->
+        <h3>Agregar</h3>
+        <form id="formCliente">
+            <input type="text" id="nombreCliente" placeholder="Nombre" required>
+            <input type="text" id="identificacionCliente" placeholder="Identificación" required>
+            <input type="text" id="direccionCliente" placeholder="Dirección">
+            <input type="text" id="telefonoCliente" placeholder="Teléfono">
+            <input type="email" id="correoCliente" placeholder="Correo">
+            <button type="submit">Guardar Cliente</button>
+        </form>
+
+        <!-- Facturas -->
+        <h3>Agregar Factura</h3>
+        <form id="formFactura">
+            <input type="text" id="numeroFactura" placeholder="Número de Factura" required>
+            <input type="date" id="periodoFacturacion" required>
+            <input type="number" id="montoFacturado" placeholder="Monto Facturado" step="0.01" required>
+            <input type="number" id="montoPagado" placeholder="Monto Pagado" step="0.01">
+            <input type="number" id="idClienteFactura" placeholder="ID Cliente" required>
+            <button type="submit">Guardar Factura</button>
+        </form>
+
+        <!-- Transacciones -->
+        <h3>Agregar Transacción</h3>
+        <form id="formTransaccion">
+            <input type="text" id="codigoTransaccion" placeholder="Código" required>
+            <input type="datetime-local" id="fechaHora" required>
+            <input type="number" id="montoTransaccion" placeholder="Monto" step="0.01" required>
+            <input type="text" id="estado" placeholder="Estado" required>
+            <input type="text" id="tipoTransaccion" placeholder="Tipo" required>
+            <input type="text" id="plataforma" placeholder="Plataforma">
+            <input type="number" id="idFacturaTransaccion" placeholder="ID Factura" required>
+            <button type="submit">Guardar Transacción</button>
+        </form>
+    </section>
+
+    <!-- =TABLAS = -->
+    <section>
+        <h2>Datos</h2>
+        <div class="tabla-container">
+            <h3>usuarios</h3>
+            <table id="tablaClientes"></table>
+
+            <h3>Facturas</h3>
+            <table id="tablaFacturas"></table>
+
+            <h3>Transacciones</h3>
+            <table id="tablaTransacciones"></table>
+        </div>
+    </section>
+
+    <script src="app.js"></script>
+</body>
+
+</html>
