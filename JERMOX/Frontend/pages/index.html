@@ -1,14 +1,153 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SPA Autenticación Backend</title>
-<link rel="stylesheet" href="style.css">
-</head>
-<body>
-<div id="app"></div>
-<script src="app.js"></script>
-</body>
-</html>
+backend/
+ ├─ middlewares/
+ ├─ routes/
+ │   └─ userAccounts.js   # Registro, login, listar usuarios
+ ├─ db.js                 # Configuración cliente supabase
+ ├─ server.js             # Servidor express
+ ├─ .env                  # Variables de entorno
+ └─ package.json
+📄 backend/db.js
+js
+Copiar código
+const { createClient } = require("@supabase/supabase-js");
 
+const SUPABASE_URL = process.env.SUPABASE_URL;
+const SUPABASE_KEY = process.env.SUPABASE_KEY;
+
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+module.exports = supabase;
+📄 backend/routes/userAccounts.js
+js
+Copiar código
+const express = require("express");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const supabase = require("../db");
+const router = express.Router();
+
+const SECRET_KEY = process.env.SECRET_KEY || "clave_super_secreta"; 
+
+// 📌 Registro
+router.post("/register", async (req, res) => {
+  const { nombre, email, telefono, password } = req.body;
+
+  try {
+    // 1. Verificar si ya existe
+    const { data: existingUser } = await supabase
+      .from("user_account")
+      .select("id")
+      .eq("email", email)
+      .single();
+
+    if (existingUser) {
+      return res.status(400).json({ msg: "El usuario ya existe" });
+    }
+
+    // 2. Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // 3. Insertar
+    const { error: insertError } = await supabase
+      .from("user_account")
+      .insert([{ nombre, email, telefono, password: hashedPassword }]);
+
+    if (insertError) throw insertError;
+
+    res.json({ msg: "Usuario registrado correctamente" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ msg: "Error en el servidor", error: err.message });
+  }
+});
+
+// 📌 Login
+router.post("/login", async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+    // 1. Buscar usuario
+    const { data: user, error } = await supabase
+      .from("user_account")
+      .select("*")
+      .eq("email", email)
+      .single();
+
+    if (!user) return res.status(400).json({ msg: "Usuario no encontrado" });
+
+    // 2. Validar password
+    const validPassword = await bcrypt.compare(password, user.password);
+    if (!validPassword) return res.status(400).json({ msg: "Contraseña incorrecta" });
+
+    // 3. Crear token
+    const token = jwt.sign(
+      { id: user.id, email: user.email },
+      SECRET_KEY,
+      { expiresIn: "1h" }
+    );
+
+    res.json({
+      msg: "Login exitoso",
+      token,
+      user: {
+        id: user.id,
+        nombre: user.nombre,
+        email: user.email,
+        telefono: user.telefono
+      }
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ msg: "Error en el servidor", error: err.message });
+  }
+});
+
+// 📌 Listar usuarios (ocultando password)
+router.get("/", async (req, res) => {
+  try {
+    const { data: users, error } = await supabase
+      .from("user_account")
+      .select("id, nombre, email, telefono");
+
+    if (error) throw error;
+
+    res.json(users);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ msg: "Error en el servidor", error: err.message });
+  }
+});
+
+module.exports = router;
+📄 backend/server.js
+js
+Copiar código
+const express = require("express");
+const cors = require("cors");
+const bodyParser = require("body-parser");
+
+const userAccountsRoutes = require("./routes/userAccounts");
+
+const app = express();
+app.use(cors());
+app.use(bodyParser.json());
+
+// Rutas API
+app.use("/api/users", userAccountsRoutes);
+
+const PORT = 4000;
+app.listen(PORT, () => console.log(`Servidor en http://localhost:${PORT}`));
+📄 .env (en la raíz de backend)
+ini
+Copiar código
+SUPABASE_URL=https://xxxx.supabase.co
+SUPABASE_KEY=tu_api_key_secreta
+SECRET_KEY=mi_clave_jwt_super_segura
+⚠️ Importante: Usa la anon o service_role key de Supabase según si el backend es público o privado. Para operaciones sensibles como login/registro, se recomienda service_role porque puede hacer inserts.
+
+🚀 Endpoints listos
+POST http://localhost:4000/api/users/register → registro con contraseña hasheada
+
+POST http://localhost:4000/api/users/login → validación + JWT
+
+GET http://localhost:4000/api/users → lista usuarios (sin password)
